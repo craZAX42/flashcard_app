@@ -3,13 +3,19 @@ import 'package:provider/provider.dart';
 import 'definitions.dart';
 
 class EditFlashcardForm extends StatefulWidget {
+  EditFlashcardForm({
+    this.addCard = false,
+    final initialCard,
+  }) : _initialCard = initialCard ?? Flashcard();
+  final bool addCard;
+  final Flashcard _initialCard;
+
   @override
   State<EditFlashcardForm> createState() => _EditFlashcardFormState();
 }
 
 class _EditFlashcardFormState extends State<EditFlashcardForm> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  Flashcard flashcard = Flashcard();
 
   String? validator(String? value) {
     if (value == null || value.isEmpty) {
@@ -18,37 +24,50 @@ class _EditFlashcardFormState extends State<EditFlashcardForm> {
     return null;
   }
 
-  void assignCardToValue(String val, String? newValue) {
-    if (val == "frontTitle") flashcard.front.title = newValue.toString();
-    if (val == "frontDescription") flashcard.front.description = newValue.toString();
-    if (val == "backTitle") flashcard.back.title = newValue.toString();
-    if (val == "backDescription") flashcard.back.description = newValue.toString();
-  }
-
-  Widget textFormFieldMaker(String val, String hintText, bool bigField) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: TextFormField(
-        onChanged: (value) {
-          assignCardToValue(val, value);
-        },
-        decoration: InputDecoration(
-          hintText: hintText,
-          enabledBorder: UnderlineInputBorder(
-            borderSide: BorderSide(
-              color: theme.colorScheme.primary,
-            ),
-          ),
-        ),
-        maxLines: bigField ? 4 : 1,
-        validator: validator,
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     var appState = context.watch<MyAppState>();
+    Flashcard flashcard = widget._initialCard;
+
+    void assignCardToValue(String val, String newValue) {
+      if (val == "frontTitle") flashcard.front.title = newValue.toString();
+      if (val == "frontDescription") flashcard.front.description = newValue.toString();
+      if (val == "backTitle") flashcard.back.title = newValue.toString();
+      if (val == "backDescription") flashcard.back.description = newValue.toString();
+    }
+
+    String initialTextField(String val) {
+      Flashcard card = widget._initialCard;
+      if (val == "frontTitle") return card.front.title;
+      if (val == "frontDescription") return card.front.description;
+      if (val == "backTitle") return card.back.title;
+      if (val == "backDescription") return card.back.description;
+      return "";
+    }
+
+    Widget textFormFieldMaker(String val, String hintText, bool bigField) {
+      return Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: TextFormField(
+          onChanged: (value) {
+            assignCardToValue(val, value);
+          },
+          controller: TextEditingController(
+            text: initialTextField(val),
+          ),
+          decoration: InputDecoration(
+            hintText: hintText,
+            enabledBorder: UnderlineInputBorder(
+              borderSide: BorderSide(
+                color: theme.colorScheme.primary,
+              ),
+            ),
+          ),
+          maxLines: bigField ? 4 : 1,
+          validator: bigField ? null : validator,
+        ),
+      );
+    }
 
     Form newFlashcardForm() {
       return Form(
@@ -80,7 +99,11 @@ class _EditFlashcardFormState extends State<EditFlashcardForm> {
               child: ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
-                    appState.addCardToSet(appState.curSet!.name, flashcard);
+                    if (widget.addCard) {
+                      appState.addCardToSet(appState.curSet!.name, flashcard);
+                    } else {
+                      appState.updateSet(appState.curSet!.name, flashcard);
+                    }
                     Navigator.pop(context, flashcard);
                   }
                 },

@@ -35,8 +35,15 @@ class _SetPageState extends State<SetPage> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => EditFlashcardForm(),
+              builder: (context) => EditFlashcardForm(
+                addCard: true,
+              ),
             ),
+          );
+          setState(
+            () {
+              curSet = appState.curSet!;
+            },
           );
         },
         child: Icon(
@@ -48,7 +55,7 @@ class _SetPageState extends State<SetPage> {
 }
 
 class SetListCard extends StatelessWidget {
-  const SetListCard({
+  SetListCard({
     super.key,
     required this.flashcard,
   });
@@ -64,17 +71,30 @@ class SetListCard extends StatelessWidget {
       fontStyle: FontStyle.italic,
     );
 
-    return Card(
-      color: theme.colorScheme.secondary,
-      elevation: 10.0,
-      margin: EdgeInsets.all(20.0),
-      child: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Text(
-          flashcard.front.title,
-          style: style,
+    return GestureDetector(
+      child: Card(
+        color: theme.colorScheme.secondary,
+        elevation: 10.0,
+        margin: EdgeInsets.all(20.0),
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Text(
+            flashcard.front.title,
+            style: style,
+          ),
         ),
       ),
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => EditFlashcardForm(
+              initialCard: flashcard,
+            ),
+          ),
+        );
+        //setState(() {});
+      },
     );
   }
 }

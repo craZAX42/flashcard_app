@@ -6,6 +6,7 @@ class FlashcardFace {
 }
 
 class Flashcard {
+  UniqueKey uniqueKey = UniqueKey();
   FlashcardFace front = FlashcardFace();
   FlashcardFace back = FlashcardFace();
 }
@@ -35,6 +36,15 @@ class MyAppState extends ChangeNotifier {
     int index = sets.indexWhere((item) => item.name == setName);
     sets[index].flashcards.add(card);
     curSet = sets[index];
+    notifyListeners();
+  }
+
+  void updateSet(String setName, Flashcard card) {
+    int setIndex = sets.indexWhere((item) => item.name == setName);
+    int cardIndex =
+        sets[setIndex].flashcards.indexWhere((item) => item.uniqueKey == card.uniqueKey);
+    sets[setIndex].flashcards[cardIndex] = card;
+    curSet = sets[setIndex];
     notifyListeners();
   }
 }
